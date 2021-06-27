@@ -1,0 +1,2 @@
+#Extend airflow image
+docker build -t testhubdockerlvea/airflow_mod:2.1.0 .

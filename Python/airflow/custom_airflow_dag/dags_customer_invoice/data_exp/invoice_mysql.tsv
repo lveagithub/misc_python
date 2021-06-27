@@ -1,0 +1,5 @@
+id	idcustomer	orderdate	subtotal	discount	region	salesperson
+1	1	1903-01-31	1000000.0	0.0	Stockholm	Carl-​Henrik Heldin,
+2	2	1954-01-31	1000000.0	0.0	Stockholm	Göran K. Hansson
+3	3	1956-01-31	1000000.0	0.0	Stockholm	Vidar Helgesen
+4	4	1958-01-31	1000000.0	0.0	Stockholm	Mats Malm
