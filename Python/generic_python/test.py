@@ -4,14 +4,40 @@ from PIL import Image
 from base64 import decodebytes, encodebytes
 from datetime import timedelta, datetime
 
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+from requests.packages.urllib3.exceptions import MaxRetryError
+
 
 curr_dir_path = pathlib.Path(__file__).parent.absolute()
 image_dir = str(curr_dir_path) + "/test_images/"
 #test_photos = {'file': open(image_dir + "0_left.jpg" ,'rb')} #No Face
 #test_photos = {'file': open(image_dir + "Selfie.jpg" ,'rb')} #Multiple Faces
-test_photos = {'file': open(image_dir + "test1.jpg" ,'rb')} #Single Face
+test_photos = {'file': open(image_dir + "Selfie.jpg" ,'rb')} #Single Face
 
-resp = requests.post(url='http://tov-m-LoadB-RUXY2HD2AGFL-242d67356c99bf24.elb.us-east-1.amazonaws.com:80/eyesDiagnosis', files=test_photos)
+try:
+    resp = requests.models.Response()
+    resp.status_code = 400
+
+    #Controlling http Session
+    session_ = requests.Session()
+    retries_ = Retry(total=5, backoff_factor=5, status_forcelist=[ 502, 503, 504 ])
+    session_.mount('http://', HTTPAdapter(max_retries=retries_))
+
+    # "httpstat.us" It's a Simple service for generating different HTTP codes. 
+    # It's useful for testing how your own scripts deal with varying responses.
+    #resp_test = session_.get("http://httpstat.us/503")
+    #print(f"The temporal response: {resp_test}")
+    
+    resp = session_.post(url='http://tov-m-LoadB-18I5O5VTXDK6S-899453c1eafe5051.elb.us-east-1.amazonaws.com:80/eyesDiagnosis', files=test_photos, headers={'User-Agent': 'Mozilla/5.0'})
+
+    #resp = requests.post(url='http://tov-m-LoadB-18I5O5VTXDK6S-899453c1eafe5051.elb.us-east-1.amazonaws.com:80/eyesDiagnosis', files=test_photos, headers={'User-Agent': 'Mozilla/5.0'})
+    #resp = requests.post(url='http://10.188.112.39:80/eyesDiagnosis', files=test_photos)
+    
+except Exception as e:
+    print(e)
+finally:
+    session_.close
 
 def write_reponse_image(image_64_encode):
     #Parsed images directory
@@ -35,9 +61,10 @@ for key, value in json_pairs:
     print('{} {}'.format(key, value))
     #We want to get the images
     if key == 'data':
-        dic_data = value[0]
-        for data_key in dic_data:
-            if data_key == 'left_eye_im':
-                write_reponse_image(dic_data[data_key])
-            if data_key == 'right_eye_im':
-                write_reponse_image(dic_data[data_key])
+        if len(value) > 0:
+            dic_data = value[0]
+            for data_key in dic_data:
+                if data_key == 'left_eye_im':
+                    write_reponse_image(dic_data[data_key])
+                if data_key == 'right_eye_im':
+                    write_reponse_image(dic_data[data_key])
