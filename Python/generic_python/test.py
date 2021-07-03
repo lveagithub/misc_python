@@ -37,7 +37,9 @@ try:
 
     #resp = requests.post(url='http://tov-m-LoadB-18I5O5VTXDK6S-899453c1eafe5051.elb.us-east-1.amazonaws.com:80/eyesDiagnosis', files=test_photos, headers={'User-Agent': 'Mozilla/5.0'})
     #resp = requests.post(url='http://10.188.112.39:80/eyesDiagnosis', files=test_photos)
-    
+
+except MaxRetryError as e:
+    print(f"Failed due to {e.reason}")    
 except Exception as e:
     print(e)
 finally:
