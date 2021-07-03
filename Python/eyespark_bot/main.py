@@ -24,6 +24,7 @@ userStep = {}  # so they won't reset every time the bot restarts
 #cap.set(4,360)
 
 CURR_DIR_PATH = pathlib.Path(__file__).parent.absolute()
+API_URL = 'http://tov-m-LoadB-9DHGIWGB3RBL-fa6e97b58b0ec9fa.elb.us-east-1.amazonaws.com:80/eyesDiagnosis'
 
 commands = {  # command description used in the "help" command
               'start': 'Get used to the bot',
@@ -33,7 +34,7 @@ commands = {  # command description used in the "help" command
 }
 
 imageSelect = types.ReplyKeyboardMarkup(one_time_keyboard=True)  # create the image selection keyboard
-imageSelect.add('camera', 'uaeh')
+#imageSelect.add('camera1', 'camera2')
 
 hideBoard = types.ReplyKeyboardRemove()  # if sent as reply_markup, will hide the keyboard
 
@@ -125,7 +126,7 @@ def consume_api(image_path):
         #resp_test = session_.get("http://httpstat.us/503")
         #print(f"The temporal response: {resp_test}")
         
-        resp = session_.post(url='http://tov-m-LoadB-RXZXM237C20Y-611ee7192043f9fb.elb.us-east-1.amazonaws.com:80/eyesDiagnosis', files=test_photos, headers={'User-Agent': 'Mozilla/5.0'})
+        resp = session_.post(url=API_URL, files=test_photos, headers={'User-Agent': 'Mozilla/5.0'})
 
         #resp = requests.post(url='http://tov-m-LoadB-18I5O5VTXDK6S-899453c1eafe5051.elb.us-east-1.amazonaws.com:80/eyesDiagnosis', files=test_photos, headers={'User-Agent': 'Mozilla/5.0'})
         #resp = requests.post(url='http://10.188.112.39:80/eyesDiagnosis', files=test_photos)
@@ -160,6 +161,7 @@ def write_reponse_image(image_64_encode):
     tmp_img_name = parsed_img_dir_full + image_result_name_tmp
     image_result = open(tmp_img_name, 'wb') # create a writable image and write the decoding result
     image_result.write(image_64_decode)
+    return tmp_img_name
 
 # user can chose an image (multi-stage command example)
 @bot.message_handler(commands=['getImage'])
@@ -201,6 +203,8 @@ def msg_image_select(m):
     right_eye_im_desc_ = ""
     right_eye_im_diagnosis_ = ""
     right_eye_im_ = ""
+    tmp_img_name_right = ""
+    tmp_img_name_left = ""
 
     if resp.status_code != 200:
         # This means something went wrong and we want to know what happened
@@ -220,17 +224,42 @@ def msg_image_select(m):
                     if data_key == "left_eye_im_diagnosis":
                         left_eye_im_diagnosis_ = dic_data[data_key]
                     if data_key == "right_eye_im_desc":
-                        left_eye_im_desc_ = dic_data[data_key]
+                        right_eye_im_desc_ = dic_data[data_key]
                     if data_key == "right_eye_im_diagnosis":
                         right_eye_im_diagnosis_ = dic_data[data_key]
                     if data_key == 'left_eye_im':
                         left_eye_im_ = dic_data[data_key]
-                        write_reponse_image(left_eye_im_)
+                        tmp_img_name_left = write_reponse_image(left_eye_im_)
                     if data_key == 'right_eye_im':
                         right_eye_im_ = dic_data[data_key]
-                        write_reponse_image(right_eye_im_)
+                        tmp_img_name_right = write_reponse_image(right_eye_im_)
 
-    html_string = f"<b>Done in {proc_time} seconds</b>"
+    html_string = f"<b>Report: {category_}</b>"
+    bot.send_message(cid, html_string, parse_mode='HTML')
+    
+    html_string = f"<b>{left_eye_im_desc_}: {left_eye_im_diagnosis_}</b>"
+    bot.send_message(cid, html_string, parse_mode='HTML')
+
+    bot.send_photo(cid, open(tmp_img_name_left, 'rb'), reply_markup=hideBoard)
+
+    #html_string = f"<b>left_eye_im_diagnosis_: {left_eye_im_diagnosis_}</b>"
+    #bot.send_message(cid, html_string, parse_mode='HTML')
+
+    #html_string = f"<b>left_eye_im_: {category_}</b>"
+    #bot.send_message(cid, html_string, parse_mode='HTML')
+
+    html_string = f"<b>{right_eye_im_desc_}: {right_eye_im_diagnosis_}</b>"
+    bot.send_message(cid, html_string, parse_mode='HTML')
+
+    bot.send_photo(cid, open(tmp_img_name_right, 'rb'), reply_markup=hideBoard)
+
+    #html_string = f"<b>right_eye_im_diagnosis_: {right_eye_im_diagnosis_}</b>"
+    #bot.send_message(cid, html_string, parse_mode='HTML')
+
+    #html_string = f"<b>right_eye_im_: {category_}</b>"
+    #bot.send_message(cid, html_string, parse_mode='HTML')
+
+    html_string = f"<b>It took {proc_time} seconds</b>"
     bot.send_message(cid, html_string, parse_mode='HTML')
 
     #bot.send_message(chat_id = cid, text = "<b>Processing and predicting ...</b>", parse_mode='HTML')
