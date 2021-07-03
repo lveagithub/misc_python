@@ -165,7 +165,7 @@ def write_reponse_image(image_64_encode):
 @bot.message_handler(commands=['getImage'])
 def command_image(m):
     cid = m.chat.id
-    bot.send_message(cid, "Please choose your image now", reply_markup=imageSelect)  # show the keyboard
+    bot.send_message(cid, "Please choose your image now", parse_mode='HTML', reply_markup=imageSelect)  # show the keyboard
     userStep[cid] = 1  # set the user to the next step (expecting a reply in the listener now)
 
 
@@ -189,9 +189,18 @@ def msg_image_select(m):
     with open(image_dir + generated_img_name, 'wb') as new_file:
         new_file.write(downloaded_file)
 
-    bot.send_message(cid, "Processing and predicting ...")
+    bot.send_message(chat_id = cid, text = "<b>Processing and predicting ...</b>", parse_mode='HTML')
 
     resp, proc_time = consume_api(image_path = image_dir + generated_img_name)
+
+    #Initializing variables
+    category_ = ""
+    left_eye_im_desc_ = ""
+    left_eye_im_diagnosis_ = ""
+    left_eye_im_ = ""
+    right_eye_im_desc_ = ""
+    right_eye_im_diagnosis_ = ""
+    right_eye_im_ = ""
 
     if resp.status_code != 200:
         # This means something went wrong and we want to know what happened
@@ -199,20 +208,32 @@ def msg_image_select(m):
     json_pairs = resp.json().items()
     for key, value in json_pairs:
         print('{} {}'.format(key, value))
+        if key == 'category':
+            category_ = value
         #We want to get the images
         if key == 'data':
             if len(value) > 0:
                 dic_data = value[0]
                 for data_key in dic_data:
+                    if data_key == "left_eye_im_desc":
+                        left_eye_im_desc_ = dic_data[data_key]
+                    if data_key == "left_eye_im_diagnosis":
+                        left_eye_im_diagnosis_ = dic_data[data_key]
+                    if data_key == "right_eye_im_desc":
+                        left_eye_im_desc_ = dic_data[data_key]
+                    if data_key == "right_eye_im_diagnosis":
+                        right_eye_im_diagnosis_ = dic_data[data_key]
                     if data_key == 'left_eye_im':
-                        write_reponse_image(dic_data[data_key])
+                        left_eye_im_ = dic_data[data_key]
+                        write_reponse_image(left_eye_im_)
                     if data_key == 'right_eye_im':
-                        write_reponse_image(dic_data[data_key])
+                        right_eye_im_ = dic_data[data_key]
+                        write_reponse_image(right_eye_im_)
 
+    html_string = f"<b>Done in {proc_time} seconds</b>"
+    bot.send_message(cid, html_string, parse_mode='HTML')
 
-    bot.send_message(cid, f"Done in {proc_time} seconds")
-
-
+    #bot.send_message(chat_id = cid, text = "<b>Processing and predicting ...</b>", parse_mode='HTML')
 # filter on a specific message
 @bot.message_handler(func=lambda message: message.text == "hi")
 def command_text_hi(m):
