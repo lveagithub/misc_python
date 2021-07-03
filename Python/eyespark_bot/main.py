@@ -18,14 +18,14 @@ cap.set(4,360)
 commands = {  # command description used in the "help" command
               'start': 'Get used to the bot',
               'help': 'Gives you information about the available commands',
-              'sendLongText': 'A test using the \'send_chat_action\' command',
+              #'sendLongText': 'A test using the \'send_chat_action\' command',
               'getImage': 'A test using multi-stage messages, custom keyboard, and media sending'
 }
 
 imageSelect = types.ReplyKeyboardMarkup(one_time_keyboard=True)  # create the image selection keyboard
 imageSelect.add('camera', 'uaeh')
 
-hideBoard = types.ReplyKeyboardHide()  # if sent as reply_markup, will hide the keyboard
+hideBoard = types.ReplyKeyboardRemove()  # if sent as reply_markup, will hide the keyboard
 
 
 # error handling if user isn't known yet
@@ -87,13 +87,13 @@ def command_help(m):
 
 
 # chat_action example (not a good one...)
-@bot.message_handler(commands=['sendLongText'])
-def command_long_text(m):
-    cid = m.chat.id
-    bot.send_message(cid, "If you think so...")
-    bot.send_chat_action(cid, 'typing')  # show the bot "typing" (max. 5 secs)
-    time.sleep(3)
-    bot.send_message(cid, ".")
+#@bot.message_handler(commands=['sendLongText'])
+#def command_long_text(m):
+#    cid = m.chat.id
+#    bot.send_message(cid, "If you think so...")
+#    bot.send_chat_action(cid, 'typing')  # show the bot "typing" (max. 5 secs)
+#    time.sleep(3)
+#    bot.send_message(cid, ".")
 
 
 # user can chose an image (multi-stage command example)
