@@ -1,5 +1,6 @@
 import requests
 import pathlib
+import time
 from PIL import Image
 from base64 import decodebytes, encodebytes
 from datetime import timedelta, datetime
@@ -13,15 +14,18 @@ curr_dir_path = pathlib.Path(__file__).parent.absolute()
 image_dir = str(curr_dir_path) + "/test_images/"
 #test_photos = {'file': open(image_dir + "0_left.jpg" ,'rb')} #No Face
 #test_photos = {'file': open(image_dir + "Selfie.jpg" ,'rb')} #Multiple Faces
-test_photos = {'file': open(image_dir + "Selfie.jpg" ,'rb')} #Single Face
+test_photos = {'file': open(image_dir + "Cataract_eyes_face_2.jpg" ,'rb')} #Single Face
 
+t0 = time.time()
 try:
     resp = requests.models.Response()
     resp.status_code = 400
 
     #Controlling http Session
     session_ = requests.Session()
-    retries_ = Retry(total=5, backoff_factor=5, status_forcelist=[ 502, 503, 504 ])
+    allowed_methods_ = frozenset({'HEAD', 'GET', 'TRACE', 'POST'})
+    status_forcelist_ = frozenset({502, 503, 504})
+    retries_ = Retry(total=5, backoff_factor=5,allowed_methods = allowed_methods_, status_forcelist=status_forcelist_)
     session_.mount('http://', HTTPAdapter(max_retries=retries_))
 
     # "httpstat.us" It's a Simple service for generating different HTTP codes. 
@@ -29,7 +33,7 @@ try:
     #resp_test = session_.get("http://httpstat.us/503")
     #print(f"The temporal response: {resp_test}")
     
-    resp = session_.post(url='http://tov-m-LoadB-18I5O5VTXDK6S-899453c1eafe5051.elb.us-east-1.amazonaws.com:80/eyesDiagnosis', files=test_photos, headers={'User-Agent': 'Mozilla/5.0'})
+    resp = session_.post(url='http://tov-m-LoadB-RXZXM237C20Y-611ee7192043f9fb.elb.us-east-1.amazonaws.com:80/eyesDiagnosis', files=test_photos, headers={'User-Agent': 'Mozilla/5.0'})
 
     #resp = requests.post(url='http://tov-m-LoadB-18I5O5VTXDK6S-899453c1eafe5051.elb.us-east-1.amazonaws.com:80/eyesDiagnosis', files=test_photos, headers={'User-Agent': 'Mozilla/5.0'})
     #resp = requests.post(url='http://10.188.112.39:80/eyesDiagnosis', files=test_photos)
@@ -37,7 +41,10 @@ try:
 except Exception as e:
     print(e)
 finally:
-    session_.close
+    t1 = time.time()
+    print(f"Took, {t1-t0}, seconds")
+    #print(f"Retries info:{retries_.__dict__}")
+    session_.close()
 
 def write_reponse_image(image_64_encode):
     #Parsed images directory
