@@ -25,7 +25,7 @@ try:
     session_ = requests.Session()
     allowed_methods_ = frozenset({'HEAD', 'GET', 'TRACE', 'POST'})
     status_forcelist_ = frozenset({502, 503, 504})
-    retries_ = Retry(total=5, backoff_factor=5,allowed_methods = allowed_methods_, status_forcelist=status_forcelist_)
+    retries_ = Retry(total=5, backoff_factor=1,allowed_methods = allowed_methods_, status_forcelist=status_forcelist_)
     session_.mount('http://', HTTPAdapter(max_retries=retries_))
 
     # "httpstat.us" It's a Simple service for generating different HTTP codes. 
@@ -39,9 +39,13 @@ try:
     #resp = requests.post(url='http://10.188.112.39:80/eyesDiagnosis', files=test_photos)
 
 except MaxRetryError as e:
-    print(f"Failed due to {e.reason}")    
+    print(f"Failed due to: {e.reason}")    
 except Exception as e:
-    print(e)
+    if hasattr(e, 'message'):
+        print(f"Failed due to {e.message}")
+    else:
+        print(f"Failed due to: {e}")  
+    
 finally:
     t1 = time.time()
     print(f"Took, {t1-t0}, seconds")
