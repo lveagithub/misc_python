@@ -205,6 +205,7 @@ def msg_image_select(m):
     right_eye_im_ = ""
     tmp_img_name_right = ""
     tmp_img_name_left = ""
+    message_ = ""
 
     if resp.status_code != 200:
         # This means something went wrong and we want to know what happened
@@ -214,6 +215,8 @@ def msg_image_select(m):
         print('{} {}'.format(key, value))
         if key == 'category':
             category_ = value
+        if key == "message":
+            message_ = value
         #We want to get the images
         if key == 'data':
             if len(value) > 0:
@@ -237,32 +240,38 @@ def msg_image_select(m):
     html_string = f"<b>Report: {category_}</b>"
     bot.send_message(cid, html_string, parse_mode='HTML')
     
-    html_string = f"<b>{left_eye_im_desc_}: {left_eye_im_diagnosis_}</b>"
-    bot.send_message(cid, html_string, parse_mode='HTML')
+    if message_ == "success":
+        html_string = f"<b>{left_eye_im_desc_}: {left_eye_im_diagnosis_}</b>"
+        bot.send_message(cid, html_string, parse_mode='HTML')
 
-    bot.send_photo(cid, open(tmp_img_name_left, 'rb'), reply_markup=hideBoard)
+        if len(tmp_img_name_left) > 0:
+            bot.send_photo(cid, open(tmp_img_name_left, 'rb'), reply_markup=hideBoard)
 
-    #html_string = f"<b>left_eye_im_diagnosis_: {left_eye_im_diagnosis_}</b>"
-    #bot.send_message(cid, html_string, parse_mode='HTML')
+        #html_string = f"<b>left_eye_im_diagnosis_: {left_eye_im_diagnosis_}</b>"
+        #bot.send_message(cid, html_string, parse_mode='HTML')
 
-    #html_string = f"<b>left_eye_im_: {category_}</b>"
-    #bot.send_message(cid, html_string, parse_mode='HTML')
+        #html_string = f"<b>left_eye_im_: {category_}</b>"
+        #bot.send_message(cid, html_string, parse_mode='HTML')
 
-    html_string = f"<b>{right_eye_im_desc_}: {right_eye_im_diagnosis_}</b>"
-    bot.send_message(cid, html_string, parse_mode='HTML')
+        html_string = f"<b>{right_eye_im_desc_}: {right_eye_im_diagnosis_}</b>"
+        bot.send_message(cid, html_string, parse_mode='HTML')
 
-    bot.send_photo(cid, open(tmp_img_name_right, 'rb'), reply_markup=hideBoard)
+        if len(tmp_img_name_right) > 0:
+            bot.send_photo(cid, open(tmp_img_name_right, 'rb'), reply_markup=hideBoard)
 
-    #html_string = f"<b>right_eye_im_diagnosis_: {right_eye_im_diagnosis_}</b>"
-    #bot.send_message(cid, html_string, parse_mode='HTML')
+        #html_string = f"<b>right_eye_im_diagnosis_: {right_eye_im_diagnosis_}</b>"
+        #bot.send_message(cid, html_string, parse_mode='HTML')
 
-    #html_string = f"<b>right_eye_im_: {category_}</b>"
-    #bot.send_message(cid, html_string, parse_mode='HTML')
+        #html_string = f"<b>right_eye_im_: {category_}</b>"
+        #bot.send_message(cid, html_string, parse_mode='HTML')
+
+        #bot.send_message(chat_id = cid, text = "<b>Processing and predicting ...</b>", parse_mode='HTML')        
+    else:
+        html_string = f"<b>{message_}</b>"
+        bot.send_message(cid, html_string, parse_mode='HTML')
 
     html_string = f"<b>It took {proc_time} seconds</b>"
     bot.send_message(cid, html_string, parse_mode='HTML')
-
-    #bot.send_message(chat_id = cid, text = "<b>Processing and predicting ...</b>", parse_mode='HTML')
 # filter on a specific message
 @bot.message_handler(func=lambda message: message.text == "hi")
 def command_text_hi(m):
